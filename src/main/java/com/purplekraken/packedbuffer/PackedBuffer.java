@@ -76,20 +76,19 @@ public final class PackedBuffer<T> implements Iterable<T> {
         return new PackedBuffer<>(codec, memory.duplicate());
     }
 
-    public T get() {
-        return codec.read(memory);
+    public void get(T instance) {
+        codec.read(instance, memory);
     }
 
-    public T get(int index) {
+    public void get(T instance, int index) {
         int oldPosition = memory.position();
         position(index);
-        T instance = get();
+        get(instance);
         position(oldPosition);
-        return instance;
     }
 
     public void put(T instance) {
-        codec.write(instance, memory);
+        codec.write(memory, instance);
     }
 
     public void put(int index, T instance) {
@@ -102,6 +101,8 @@ public final class PackedBuffer<T> implements Iterable<T> {
     @Override
     public Iterator<T> iterator() {
         return new Iterator<T>() {
+            final T buf = codec.defaultItem();
+
             @Override
             public boolean hasNext() {
                 return memory.position() < memory.limit();
@@ -112,7 +113,8 @@ public final class PackedBuffer<T> implements Iterable<T> {
                 if (memory.position() >= memory.limit()) {
                     throw new NoSuchElementException();
                 }
-                return get();
+                get(buf);
+                return buf;
             }
         };
     }

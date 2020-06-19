@@ -32,7 +32,8 @@ public class PackedBufferTest {
         PackedBuffer<AClass> packedBuffer = PackedBuffer.allocate(AClass.CODEC, 1);
         packedBuffer.put(aClass);
         packedBuffer.flip();
-        AClass bClass = packedBuffer.get();
+        AClass bClass = AClass.CODEC.defaultItem();
+        packedBuffer.get(bClass);
         assertThat(bClass).as("The deserialized class is equal to the serialized class").isEqualTo(aClass);
     }
 }

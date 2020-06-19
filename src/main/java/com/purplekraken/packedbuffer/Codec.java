@@ -31,6 +31,13 @@ import java.nio.ByteBuffer;
  */
 public interface Codec<T> {
     /**
+     * Return a default-constructed instance of {@code T}.
+     *
+     * @return a default-constructed instance of {@code T}
+     */
+    T defaultItem();
+
+    /**
      * Return the byte-size of a single packed instance.
      *
      * @return size of a packed element in bytes
@@ -38,18 +45,18 @@ public interface Codec<T> {
     int packedSize();
 
     /**
-     * Write an instance into a @link ByteBuffer.
+     * Write an instance into a {@link ByteBuffer}.
      *
      * @param instance the instance to write
      * @param buf the buffer to write into
      */
-    void write(T instance, ByteBuffer buf);
+    void write(ByteBuffer buf, T instance);
 
     /**
-     * Read an instance from a @link ByteBuffer.
+     * Read an instance from a {@link ByteBuffer}
      *
+     * @param instance the instance to read into
      * @param buf the buffer to read from
-     * @return the read instance
      */
-    T read(ByteBuffer buf);
+    void read(T instance, ByteBuffer buf);
 }

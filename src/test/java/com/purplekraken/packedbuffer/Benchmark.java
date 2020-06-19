@@ -29,11 +29,12 @@ public class Benchmark {
     private static PackedBuffer<AClass> createBuffer(int nItems) {
         PackedBuffer<AClass> packedBuffer = PackedBuffer.allocate(AClass.CODEC, nItems);
         Random rand = new Random();
+        AClass instance = AClass.CODEC.defaultItem();
         for (int i = 0; i < nItems; i++) {
-            int v1 = rand.nextInt();
-            long v2 = rand.nextLong();
-            double v3 = rand.nextDouble();
-            packedBuffer.put(new AClass(v1, v2, v3));
+            instance.val1 = rand.nextInt();
+            instance.val2 = rand.nextLong();
+            instance.val3 = rand.nextDouble();
+            packedBuffer.put(instance);
         }
         packedBuffer.flip();
 
@@ -43,10 +44,11 @@ public class Benchmark {
     private static long runBench(int nItems) {
         PackedBuffer<AClass> packedBuffer = createBuffer(nItems);
         long sums[] = new long[nItems];
+        AClass instance = AClass.CODEC.defaultItem();
         long start = System.currentTimeMillis();
         for (int i = 0; i < nItems; i++) {
-            AClass instance = packedBuffer.get();
-            sums[i] = instance.getVal1() + instance.getVal2();
+            packedBuffer.get(instance);
+            sums[i] = instance.val1 + instance.val2;
         }
         long end = System.currentTimeMillis();
         return end - start;

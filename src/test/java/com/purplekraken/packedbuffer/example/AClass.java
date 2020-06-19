@@ -25,26 +25,18 @@ import java.nio.ByteBuffer;
 import java.util.Objects;
 
 public class AClass {
-    private final int val1;
-    private final long val2;
-    private final double val3;
+    public int val1;
+    public long val2;
+    public double val3;
+
+    public AClass() {
+        this(0, 0, 0);
+    }
 
     public AClass(int v1, long v2, double v3) {
         val1 = v1;
         val2 = v2;
         val3 = v3;
-    }
-
-    public int getVal1() {
-        return val1;
-    }
-
-    public long getVal2() {
-        return val2;
-    }
-
-    public double getVal3() {
-        return val3;
     }
 
     @Override
@@ -64,24 +56,27 @@ public class AClass {
 
     static public Codec<AClass> CODEC = new Codec<AClass>() {
         @Override
+        public AClass defaultItem() {
+            return new AClass();
+        }
+
+        @Override
         public int packedSize() {
             return Integer.BYTES + Long.BYTES + Double.BYTES;
         }
 
         @Override
-        public void write(AClass instance, ByteBuffer buf) {
-            buf.putInt(instance.getVal1());
-            buf.putLong(instance.getVal2());
-            buf.putDouble(instance.getVal3());
+        public void write(ByteBuffer buf, AClass instance) {
+            buf.putInt(instance.val1);
+            buf.putLong(instance.val2);
+            buf.putDouble(instance.val3);
         }
 
         @Override
-        public AClass read(ByteBuffer buf) {
-            // more complex objects might want to use a builder
-            int val1 = buf.getInt();
-            long val2 = buf.getLong();
-            double val3 = buf.getDouble();
-            return new AClass(val1, val2, val3);
+        public void read(AClass instance, ByteBuffer buf) {
+            instance.val1 = buf.getInt();
+            instance.val2 = buf.getLong();
+            instance.val3 = buf.getDouble();
         }
     };
 }
