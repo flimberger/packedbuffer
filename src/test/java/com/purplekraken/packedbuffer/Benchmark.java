@@ -26,6 +26,9 @@ import java.util.Arrays;
 import java.util.Random;
 
 public class Benchmark {
+    private static final int NITEMS = 1024 * 1024 * 64;
+    private static final int NROUNDS = 128;
+
     private static PackedBuffer<AClass> createBuffer(int nItems) {
         PackedBuffer<AClass> packedBuffer = PackedBuffer.allocate(AClass.CODEC, nItems);
         Random rand = new Random();
@@ -56,19 +59,49 @@ public class Benchmark {
 
     @Test
     public void run() {
-        int nItems = 1024 * 1024 * 64;
-        int nRounds = 128;
         int itemSize = AClass.CODEC.packedSize();
-        int sum = nItems * itemSize;
-        System.out.println("mem: " + nItems + " * " + itemSize + " = " + sum + " (" + ((double)sum / (1024*1024*1024)) + " GB)" );
-        long[] durations = new long[nRounds];
-        for (int i = 0; i < nRounds; i++) {
-            durations[i] = runBench(nItems);
+        int sum = NITEMS * itemSize;
+        System.out.println("mem: " + NITEMS + " * " + itemSize + " = " + sum + " (" + ((double)sum / (1024*1024*1024)) + " GB)" );
+        long[] durations = new long[NROUNDS];
+        for (int i = 0; i < NROUNDS; i++) {
+            durations[i] = runBench(NITEMS);
             System.out.print('.');
             System.out.flush();
         }
         System.out.println();
-        double avg = (double)Arrays.stream(durations).sum() / nRounds;
-        System.out.println("" + nRounds + " rounds with " + nItems + " items each: " + avg + " ms");
+        double avg = (double)Arrays.stream(durations).sum() / NROUNDS;
+        System.out.println("" + NROUNDS + " rounds with " + NITEMS + " items each: " + avg + " ms");
+    }
+
+    private static long runReferenceBench(int nItems) {
+        AClass[] buf = new AClass[nItems];
+        Random rand = new Random();
+        for (int i = 0; i < nItems; i++) {
+            buf[i] = new AClass(rand.nextInt(), rand.nextLong(), rand.nextDouble());
+        }
+        long sums[] = new long[nItems];
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < nItems; i++) {
+            AClass instance = buf[i];
+            sums[i] = instance.val1 + instance.val2;
+        }
+        long end = System.currentTimeMillis();
+        return end - start;
+    }
+
+    @Test
+    public void runReference() throws InterruptedException {
+        long[] durations = new long[NROUNDS];
+        for (int i = 0; i < NROUNDS; i++) {
+            durations[i] = runReferenceBench(NITEMS);
+            System.out.print('.');
+            System.out.flush();
+            // Without this, the run aborts with a OutOfMemoryException: Heap Space
+            System.gc();
+            Thread.sleep(1000);
+        }
+        System.out.println();
+        double avg = (double)Arrays.stream(durations).sum() / NROUNDS;
+        System.out.println("" + NROUNDS + " rounds with " + NITEMS + " items each: " + avg + " ms");
     }
 }

@@ -1,0 +1,22 @@
+benchmark
+---------
+
+test machine: 6 cores Intel(R) Core(TM) i7-8750H CPU @ 2.20GHz
+
+mem: 67108864 * 20 = 1342177280 (1.25 GB)
+
+first take:
+128 rounds with 67108864 items each: 445.28125 ms
+
+reduced allocations:
+128 rounds with 67108864 items each: 623.6953125 ms
+
+reference:
+128 rounds with 67108864 items each: 152.9296875 ms
+During execution,
+Java regularly fires up all 12 cores.
+While the actual processing time is way shorter than for the other benchmarks,
+it took way longer for data creation,
+and it wouldn't even run without extra code for triggering the GC (and waiting for it).
+Unfortunately,
+all those other metrics (CPU utilization, time spent managing memory) don't show up in this simplistic benchmark.
